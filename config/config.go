@@ -8,28 +8,36 @@ import (
 )
 
 type Config struct {
-	ServerPort     string `mapstructure:"SERVER_PORT"`
-	DatabaseURL    string `mapstructure:"DATABASE_URL"`
-	ExternalAPIURL string `mapstructure:"EXTERNAL_API_URL"`
-	LogLevel       string `mapstructure:"LOG_LEVEL"`
+	ServerPort string `mapstructure:"SERVER_PORT"`
+	DBHost     string `mapstructure:"DB_HOST"`
+	DBPort     string `mapstrucure:"DB_PORT"`
+	DBUser     string `mapstructure:"DB_USER"`
+	DBPassword string `mapstructure:"DB_PASSWORD"`
+	DBName     string `mapstructure:"DB_Name"`
 }
 
 // LoadConfig считывает настройки из файла `.env`.
 func LoadConfig() (*Config, error) {
 	// Загружаем переменные из .env
-	if err := godotenv.Load(); err != nil {
+	err := godotenv.Load()
+	if err != nil {
 		log.Println(".env файл не найден")
 	}
 
+	viper.SetDefault("SERVER_PORT", "8080")
+	viper.SetDefault("DB_HOST", "localhost")
+	viper.SetDefault("DB_PORT", "5432")
+
 	// Конфигурация через Viper
 	viper.AutomaticEnv() // считываем из окружения
-	viper.SetDefault("SERVER_PORT", "8080")
-	viper.SetDefault("EXTERNAL_API_URL", "http://localhost:3000/info")
-	viper.SetDefault("LOG_LEVEL", "info")
 
-	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
-		return nil, err
-	}
-	return &config, nil
+	return &Config{
+		ServerPort: viper.GetString("SERVER_PORT"),
+		DBHost:     viper.GetString("DB_HOST"),
+		DBPort:     viper.GetString("DB_PORT"),
+		DBUser:     viper.GetString("DB_USER"),
+		DBPassword: viper.GetString("DB_PASSWORD"),
+		DBName:     viper.GetString("DB_NAME"),
+	}, nil
+
 }

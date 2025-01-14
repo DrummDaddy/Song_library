@@ -1,0 +1,182 @@
+definitions:
+  model.Song:
+    properties:
+      album:
+        type: string
+      artist:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updatedAT:
+        type: string
+      year:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: REST API для управления песнями
+  termsOfService: http://example.com/terms/
+  title: Онлайн Библиотека Песен API
+  version: "1.0"
+paths:
+  /songs:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка всех песен
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список песен
+          schema:
+            items:
+              $ref: '#/definitions/model.Song'
+            type: array
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Список всех песен
+      tags:
+      - Песни
+    post:
+      consumes:
+      - application/json
+      description: Добавление новой песни в базу данных
+      parameters:
+      - description: Информация о песне
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/model.Song'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешное создание песни
+          schema:
+            $ref: '#/definitions/model.Song'
+        "400":
+          description: Некорректные данные
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать песню
+      tags:
+      - Песни
+    put:
+      consumes:
+      - application/json
+      description: Обновление информации о песне
+      parameters:
+      - description: Информация о песне
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/model.Song'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленная информация о песне
+          schema:
+            $ref: '#/definitions/model.Song'
+        "400":
+          description: Некорректные данные
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка обновления
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить песню
+      tags:
+      - Песни
+  /songs/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление песни по ID
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное удаление
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Некорректный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка удаления
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить песню
+      tags:
+      - Песни
+    get:
+      consumes:
+      - application/json
+      description: Получение информации о песне по ID
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о песне
+          schema:
+            $ref: '#/definitions/model.Song'
+        "400":
+          description: Некорректный ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Песня не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить песню по ID
+      tags:
+      - Песни
+swagger: "2.0"

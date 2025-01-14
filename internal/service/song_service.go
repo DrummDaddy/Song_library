@@ -1,42 +1,54 @@
 package service
 
 import (
+	"Song_library/database"
 	"Song_library/internal/model"
-	"database/sql"
 )
 
-type SongService struct {
-	DB *sql.DB
-}
+// SongsService предоставляет методы работы с песнями
+type SongService struct{}
 
-func (s *SongService) GetAllSongs() ([]model.Song, error) {
-	rows, err := s.DB.Query("SELECT * FROM somgs")
-	if err != nil {
+// CreateSong добавляет новую песню в базу данных
+func (s *SongService) CreateSong(song *model.Song) (*model.Song, error) {
+	if err := database.DB.Create(song).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	var songs []model.Song
-	for rows.Next() {
-		var song model.Song
-		if err := rows.Scan(
-			&song.ID, &song.GroupName, &song.SongName,
-			&song.ReleaseDate, &song.Lyrics, &song.YoutubeLink,
-			&song.CreatedAt, &song.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		songs = append(songs, song)
-
-	}
-	return songs, nil
-
+	return song, nil
 }
 
-func (s *SongService) CreatedSong(song model.Song) error {
-	_, err := s.DB.Exec(
-		`INSERT INTO songs(group_name, song_name, release_date, lyrics, youtube_link)
-		VALUES ($1, $2, $3, $4, $5)`,
-		song.GroupName, song.SongName, song.ReleaseDate, song.Lyrics, song.YoutubeLink)
-	return err
+// GetSongs возвращяет все псени
+func (s *SongService) GetSongs() ([]model.Song, error) {
+	var songs []model.Song
+	if err := database.DB.Find(&songs).Error; err != nil {
+		return nil, err
+	}
+
+	return songs, nil
+}
+
+// GetSongByID возвращяет песню по ID
+func (s *SongService) GetSongByID(id uint) (*model.Song, error) {
+	var song model.Song
+	if err := database.DB.First(&song, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &song, nil
+}
+
+// DeleteSong удаляет песню по ID
+func (s *SongService) DeleteSong(id uint) error {
+	if err := database.DB.Delete(&model.Song{}, id).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateSong обновляет данные песни
+func (s *SongService) UpdateSong(song *model.Song) (*model.Song, error) {
+	if err := database.DB.Save(song).Error; err != nil {
+		return nil, err
+	}
+	return song, nil
 }

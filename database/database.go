@@ -1,30 +1,33 @@
 package database
 
 import (
-	"database/sql"
+	"Song_library/config"
+	"Song_library/internal/model"
+	"fmt"
 	"log"
 
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
-func InitDB(databaseURL string) *sql.DB {
-	db, err := sql.Open("postgres", databaseURL)
+var DB *gorm.DB
+
+// InitDB подключается к базе данных и применяет миграции
+func InitDB(cfg *config.Config) {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort)
+	var err error
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
-		log.Fatalf("Ошибка соединения с БД: %v", err)
+		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
+	}
+	//Автоматическое применение миграций
+	if err := DB.AutoMigrate(&model.Song{}); err != nil {
+		log.Fatalf("Не удалось применить миграции: %v", err)
 	}
 
-	//Миграции
-	if _, err := db.Exec(
-		`CREATE TABLE IF NOT EXISTS songs(
-		id SERIAL PRIMARY KEY,
-		group_name VARCHAR(255) NOT NULL,
-		song_name VARCHAR(255) NOT NULL,
-		release_date DATE, 
-		lyrics TEXT,
-		youtube_link TEXT,
-		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`); err != nil {
-		log.Fatalf("Миграция не выполнена: %v", err)
-	}
-	return db
+	log.Println("Успешное подключение к базе данных")
 }
